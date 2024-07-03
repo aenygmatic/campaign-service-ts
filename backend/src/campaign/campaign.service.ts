@@ -87,7 +87,7 @@ export class CampaignService {
     );
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<Campaign> {
     const campaign = await this.getById(id);
     if (campaign.from <= new Date()) {
       throw new HttpException(

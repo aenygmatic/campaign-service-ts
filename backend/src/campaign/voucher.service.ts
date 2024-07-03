@@ -21,7 +21,15 @@ export class VoucherService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    const vouchers = await this.generateUniqueVouchers(campaign, count);
 
+    const chunks = this.chunk(vouchers, 10000);
+    const savePromises = chunks.map((chunk) => this.repository.save(chunk));
+    const savedItems = await Promise.all(savePromises);
+    return [].concat(...savedItems);
+  }
+
+  private async generateUniqueVouchers(campaign: Campaign, count: number) {
     const campaignId = campaign.id;
     const voucherCodes = await this.repository
       .createQueryBuilder('voucher')
@@ -33,7 +41,7 @@ export class VoucherService {
     const vouchers = [];
 
     for (let i = 0; i < count; i++) {
-      let code;
+      let code: string;
       do {
         const rawCode = this.generator.generate();
         code = campaign.prefix + '-' + rawCode;
@@ -42,11 +50,7 @@ export class VoucherService {
       existingCodes.add(code);
       vouchers.push(Voucher.createFromCampaign(campaign, code));
     }
-
-    const chunks = this.chunk(vouchers, 10000);
-    const savePromises = chunks.map((chunk) => this.repository.save(chunk));
-    const savedItems = await Promise.all(savePromises);
-    return [].concat(...savedItems);
+    return vouchers;
   }
 
   chunk(arr: Voucher[], size) {

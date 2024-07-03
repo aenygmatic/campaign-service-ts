@@ -23,6 +23,8 @@ npm run build
 
 The backend service will host the ui under `http://localhost:3000/ui` after you built it.
 
+**NOTE:** The app will assume that a Postgres instance is running locally at port `5432` and with username password and databased setup as `postgres`.
+
 ### Running with npm
 
 You can run the project locally with npm
